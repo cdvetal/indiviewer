@@ -1,4 +1,4 @@
-# Indiviewer
+# IndiViewer
 
 This is a Processing sketch to view individuals (images) created in an evolutionary process.
 
