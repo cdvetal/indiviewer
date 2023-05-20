@@ -2,10 +2,10 @@
 
 This is a Processing sketch to view individuals (images) created in an evolutionary process.
 
-### Required file structure
-
+### Input files
+File structure for phenotypes:
 ```
-dir_passed_as_input/
+phenotypes/
 ├─ gen001/
 │  ├─ gen001_indiv001.png
 │  ├─ gen001_indiv002.png
@@ -13,6 +13,14 @@ dir_passed_as_input/
 │  └─ ...
 ├─ gen002/
 ├─ gen003/
+└─ ...
+```
+File structure for optional genotype preview:
+```
+genotypes/
+├─ gen001.csv
+├─ gen002.csv
+├─ gen003.csv
 └─ ...
 ```
 
