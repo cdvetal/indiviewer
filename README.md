@@ -41,4 +41,4 @@ User interface:
 
 Input/output:
 - Press key `e` to instruct external evolutionary engine to evolve new generation;
-- Press key `p` to export csv file with favourite individuals.
+- Press key `p` to export csv file with favourite individuals. The file will be saved inside `dir_passed_as_input/`.
