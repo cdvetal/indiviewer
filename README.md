@@ -7,9 +7,9 @@ This is a Processing sketch to view individuals (images) created in an evolution
 ```
 dir_passed_as_input/
 ├─ gen001/
-│  ├─ indiv001.png
-│  ├─ indiv002.png
-│  ├─ indiv003.png
+│  ├─ gen001_indiv001.png
+│  ├─ gen001_indiv002.png
+│  ├─ gen001_indiv003.png
 │  └─ ...
 ├─ gen002/
 ├─ gen003/
@@ -37,6 +37,7 @@ When hovering an individual with the mouse:
 User interface:
 - Press key `+` to increase individuals' size (make fewer individuals visible);
 - Press key `-` to decrease individuals' size (make more individuals visible);
+- Press key `g` to toggle genotype preview.
 - Press key `b` to toggle dark scheme.
 
 Input/output:
