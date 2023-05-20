@@ -1,6 +1,7 @@
 import java.nio.file.Files;
 import java.util.Arrays;
 
+// ... /thecoin__run__2023_02_27__15_22_10_150__109937382532710400/images/all
 File input_dir = new File("insert/here/your/path/with/populations");
 
 ArrayList<Population> pops = new ArrayList<Population>();
@@ -14,7 +15,8 @@ long time_last_populations_load = -1;
 
 boolean dark_scheme = true;
 float pop_margin_top = 50;
-int num_cols = 0;
+int target_num_cols = 0;
+int curr_num_cols;
 float ui_unit;
 PFont font1, font2, font3;
 
@@ -49,7 +51,7 @@ void draw() {
     previous_height = height;
     prepareLayout();
   }
-  
+
   if (frameCount == 1 || scroll_current != scroll_target) {
     if (abs(scroll_current - scroll_target) > 0.1) {
       scroll_current = scroll_current * 0.85 + scroll_target * 0.15;
@@ -58,9 +60,9 @@ void draw() {
     }
     updateIndividualsVisibility();
   }
-  
+
   background(dark_scheme ? 0 : 255);
-  
+
   pushMatrix();
   translate(0, scroll_current);
   for (Individual i : all_indivs) {
@@ -186,7 +188,8 @@ void mouseWheel(MouseEvent event) {
     return;
   }
   scroll_target -= event.getCount() * scroll_gear;
-  scroll_target = constrain(scroll_target, -pops.get(pops.size() - 1).area.y, 0);
+  Population last_pop = pops.get(pops.size() - 1);
+  scroll_target = constrain(scroll_target, -(last_pop.area.getBottom() - height), 0);
 }
 
 void keyPressed() {
@@ -233,6 +236,12 @@ void keyReleased() {
           }
         }
       }
+    } else if (key == 'p') {
+      saveFavouritesToFile();
+    } else if (key == '+' || key == '-') {
+      target_num_cols = curr_num_cols + (key == '+' ? -1 : 1);
+      target_num_cols = max(target_num_cols, 1);
+      prepareLayout();
     }
   }
 }
@@ -308,11 +317,22 @@ void prepareLayout() {
     float grid_x = 20;
     float grid_w = width - grid_x * 2;
     //float grid_w = width - (bar_margin * 3 + bar_width);
-    if (num_cols > 0) {
-      grid.calculateForNCols(grid_x, grid_y, grid_w, num_cols);
+    if (target_num_cols > 0) {
+      grid.calculateForNCols(grid_x, grid_y, grid_w, target_num_cols);
     } else {
       grid.calculateToFit(grid_x, grid_y, grid_w, height - (pop_margin_top + pop_margin_bottom));
     }
+
+    // Make sure each grid cell has a minimum size
+    curr_num_cols = grid.cols;
+    while (true) {
+      if (grid.cells_list.get(0).w > 100) {
+        break;
+      }
+      curr_num_cols--;
+      grid.calculateForNCols(grid_x, grid_y, grid_w, curr_num_cols);
+    }
+
     for (int i = 0; i < pop.individuals.size(); i++) {
       pop.individuals.get(i).area = grid.cells_list.get(i);
     }
@@ -322,6 +342,7 @@ void prepareLayout() {
   }
 
   scroll_gear = pops.get(pops.size() - 1).area.getBottom() / 10000f;
+  scroll_gear = max(scroll_gear, 2);
 
   updateIndividualsVisibility();
 }
@@ -334,6 +355,20 @@ void updateIndividualsVisibility() {
       i.hide();
     }
   }
+}
+
+void saveFavouritesToFile() {
+  int num_favourites = 0;
+  String output = "";
+  for (Individual i : all_indivs) {
+    if (i.is_favourite) {
+      output += i.file_image.getPath().split(input_dir.getPath())[1] + "\n";
+      num_favourites++;
+    }
+  }
+  File output_file_favourites = new File(input_dir, "indiviewer_exported_favourites_" + System.currentTimeMillis() + ".csv");
+  saveStrings(output_file_favourites.getPath(), new String[]{output.strip()});
+  println(num_favourites + " favourites exported to: " + output_file_favourites.getPath());
 }
 
 float getCurrPop() {

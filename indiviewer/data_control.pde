@@ -6,7 +6,7 @@ class DataController {
   private long save_delay = 10000;
   
   DataController() {
-    data_file = new File(input_dir, "ui_data.json");
+    data_file = new File(input_dir, "indiviewer.json");
     load();
     save(); // This is to remove old data in the JSON file (e.g. generations that don't exist anymore)
   }
