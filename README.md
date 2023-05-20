@@ -34,6 +34,11 @@ When hovering an individual with the mouse:
 - Press key `space bar` to preview the image (press again to close or use `escape`);
 - Press key `o` to open the image file externally.
 
-Other:
-- Press key `b` to toggle dark scheme;
-- Press key `e` to instruct external evolutionary engine to evolve new generation.
+User interface:
+- Press key `+` to increase individuals' size (make fewer individuals visible);
+- Press key `-` to decrease individuals' size (make more individuals visible);
+- Press key `b` to toggle dark scheme.
+
+Input/output:
+- Press key `e` to instruct external evolutionary engine to evolve new generation;
+- Press key `p` to export csv file with favourite individuals. The file will be saved inside `dir_passed_as_input/`.
