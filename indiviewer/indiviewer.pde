@@ -1,14 +1,17 @@
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.nio.file.*;
 
-// ... /thecoin__run__2023_02_27__15_22_10_150__109937382532710400/images/all
-File input_dir = new File("insert/here/your/path/with/populations");
+//File input_dir_phenotypes = new File("insert/here/your/path/with/populations");
+File input_dir_phenotypes = new File("/Users/tiagofm/Downloads/thecoin__run__2023_02_27__15_22_10_150__109937382532710400/images/all");
+File input_dir_genotypes = new File("/Users/tiagofm/Downloads/thecoin__run__2023_02_27__15_22_10_150__109937382532710400/logs/generations");
 
 ArrayList<Population> pops = new ArrayList<Population>();
 ArrayList<Individual> all_indivs = new ArrayList<Individual>();
 
 Individual indiv_selected = null;
 boolean preview_indiv_selected = false;
+boolean preview_indiv_genotype = true;
 
 int previous_width, previous_height;
 long time_last_populations_load = -1;
@@ -18,7 +21,7 @@ float pop_margin_top = 50;
 int target_num_cols = 0;
 int curr_num_cols;
 float ui_unit;
-PFont font1, font2, font3;
+PFont font1, font2, font3, font4;
 
 float scroll_target = 0;
 float scroll_current = 0;
@@ -127,6 +130,19 @@ void draw() {
   }
 
   //bar.display();
+
+  if (indiv_selected != null && !preview_indiv_selected && preview_indiv_genotype && indiv_selected.genotype != null) {
+    textFont(font4);
+    textAlign(LEFT, TOP);
+    textLeading(g.textSize * 1.2);
+    float margin = 30;
+    float h = textHeight(indiv_selected.genotype, width - margin * 2, g.textLeading);
+    noStroke();
+    fill(g.backgroundColor, 175);
+    rect(0, height, width, -(h + margin * 2));
+    fill(dark_scheme ? 255 : 0); 
+    text(indiv_selected.genotype, margin, height - (margin + h), width - margin * 2, height);
+  }
 
   if (ec.waitingForNewGeneration()) {
     //float margin = ui_unit;
@@ -242,6 +258,8 @@ void keyReleased() {
       target_num_cols = curr_num_cols + (key == '+' ? -1 : 1);
       target_num_cols = max(target_num_cols, 1);
       prepareLayout();
+    } else if (key == 'g') {
+      preview_indiv_genotype = !preview_indiv_genotype;
     }
   }
 }
@@ -255,7 +273,7 @@ void loadIndividuals() {
 
   // Find populations' folders
   ArrayList<File> pops_dirs = new ArrayList<File>();
-  File[] files = input_dir.listFiles();
+  File[] files = input_dir_phenotypes.listFiles();
   Arrays.sort(files);
   for (int i = 0; i < files.length; i++) {
     File f = new File(files[i].getPath());
@@ -281,8 +299,35 @@ void loadIndividuals() {
     if (indivs_files.size() > 0) {
       Population new_pop = new Population(pop_dir);
       pops.add(new_pop);
+
+      Table genotypes_table = null;
+      if (input_dir_genotypes != null) {
+        String generation_number = pop_dir.getName().split("_")[1];
+        String generation_csv_filename = "gen" + generation_number + ".csv"; // FIXME This is hard-coded for now to work with a specific project.
+        File generation_csv = input_dir_genotypes.toPath().resolve(generation_csv_filename).toFile();
+        assert generation_csv.exists();
+        genotypes_table = loadTable(generation_csv.getPath(), "header");
+      }
+
       for (File f : indivs_files) {
-        Individual new_indiv = new Individual(f);
+
+        String genotype = null;
+        if (genotypes_table != null) {
+          // FIXME This is hard-coded for now to work with a specific project.
+          // phenotype --> generation_00000/gen00000_ind00000.png
+          // genotype ---> gen00000.csv >> gen00000_indiv_00000
+          String indiv_number = f.getName().split("_ind")[1].split("\\.")[0];
+          for (TableRow row : genotypes_table.rows()) {
+            String indiv_name = row.getString(" individual name");
+            if (indiv_name.endsWith(indiv_number)) {
+              genotype = row.getString(" expression");
+              break;
+            }
+          }
+          assert genotype != null;
+        }
+
+        Individual new_indiv = new Individual(f, genotype);
         new_pop.addIndividual(new_indiv);
         all_indivs.add(new_indiv);
       }
@@ -307,6 +352,7 @@ void prepareLayout() {
   font1 = createFont("fonts/Sono/Sono-Regular.ttf", 1 * ui_unit);
   font2 = createFont("fonts/Sono/Sono-Light.ttf", 1.5 * ui_unit);
   font3 = createFont("fonts/Sono/Sono-Medium.ttf", 1.2 * ui_unit);
+  font4 = createFont("fonts/Inter/Inter-Light.ttf", 0.9 * ui_unit);
 
   float pop_margin_top = 2.5 * ui_unit;
   float pop_margin_bottom = 1 * ui_unit;
@@ -362,11 +408,11 @@ void saveFavouritesToFile() {
   String output = "";
   for (Individual i : all_indivs) {
     if (i.is_favourite) {
-      output += i.file_image.getPath().split(input_dir.getPath())[1] + "\n";
+      output += i.file_image.getPath().split(input_dir_phenotypes.getPath())[1] + "\n";
       num_favourites++;
     }
   }
-  File output_file_favourites = new File(input_dir, "indiviewer_exported_favourites_" + System.currentTimeMillis() + ".csv");
+  File output_file_favourites = new File(input_dir_phenotypes, "indiviewer_exported_favourites_" + System.currentTimeMillis() + ".csv");
   saveStrings(output_file_favourites.getPath(), new String[]{output.strip()});
   println(num_favourites + " favourites exported to: " + output_file_favourites.getPath());
 }

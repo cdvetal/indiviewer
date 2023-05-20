@@ -8,7 +8,7 @@ class EvolutionController {
   private long time_last_check = 0;
   
   EvolutionController() {
-    proxy_file = new File(input_dir, "_flag_to_evolve");
+    proxy_file = new File(input_dir_phenotypes, "_flag_to_evolve");
     waiting_for_new_generation = proxy_file.exists();
   }
 

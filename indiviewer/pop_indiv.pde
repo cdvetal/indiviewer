@@ -4,6 +4,7 @@ class Individual {
   String filename;
   PImage image;
   boolean image_requested = false;
+  String genotype;
   
   Rectangle area = new Rectangle();
   boolean visible = true;
@@ -13,9 +14,14 @@ class Individual {
   int fitness = 0;
   boolean is_favourite = false;
   
-  Individual(File file_image) {
+  Individual(File file_image, String genotype) {
     this.file_image = file_image;
     filename = file_image.getName();
+    this.genotype = genotype;
+  }
+  
+  Individual(File file_image) {
+    this(file_image, null);
   }
   
   void display() {
